@@ -7,42 +7,34 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 /// @dev https://eips.ethereum.org/EIPS/eip-721
 contract CertificadoTIL is ERC721URIStorage {
     using Counters for Counters.Counter;
+
+    //Emitido cuando un certificado se actualiza
+    event TokenUpdated(uint256 indexed tokenId, string newTokenURI);
+    //Auto increment
     Counters.Counter private _tokenIds;
-
-    /// @dev TODO: move these to IPFS storage
-    struct CertificadoMetadata {
-        //No. Matricula
-        string enrollNumber;
-        string description;
-        uint256 area;
-        uint256 areaDecimals;
-        // Estado folio
-        bool invoiceState;
-        string[] actorIds;
-    }
-
-    mapping(uint256 => CertificadoMetadata) private tokenMetadata;
 
     constructor() ERC721("Certificado", "O") {}
 
-    function addCertificado(
-        address _owner,
-        CertificadoMetadata memory _metadata,
-        string memory tokenURI
-    ) external returns (uint256) {
+    /// @dev emits the Transfer event
+    function addCertificado(address _owner, string memory tokenURI)
+        external
+        returns (uint256)
+    {
         uint256 newItemId = _tokenIds.current();
         _mint(_owner, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        tokenMetadata[newItemId] = _metadata;
         _tokenIds.increment();
         return newItemId;
     }
 
-    function updateCertificado(
-        uint256 _tokenId,
-        CertificadoMetadata memory _newMetadata
-    ) external returns (bool) {
-        tokenMetadata[_tokenId] = _newMetadata;
+    /// @dev update the tokenUri metadata because IPFS is content-addressed so any change to the data
+    /// changes its address
+    function updateCertificado(uint256 _tokenId, string memory _newTokenURI)
+        external
+        returns (bool)
+    {
+        _setTokenURI(_tokenId, _newTokenURI);
+        emit TokenUpdated(_tokenId, _newTokenURI);
         return true;
     }
 

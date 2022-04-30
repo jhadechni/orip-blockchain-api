@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import configRoutes from "./rotues";
 
 const app = express();
 
@@ -10,6 +11,8 @@ app.use(morgan("tiny"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
+
+configRoutes(app);
 
 app.get("/", (req, res) => {
   res.status(200).end("Alive");
