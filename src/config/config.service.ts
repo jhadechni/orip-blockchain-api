@@ -12,7 +12,7 @@ class ConfigService {
     this.envConfig = envConfig;
   }
   static getInstance() {
-    if (this.instance == null) {
+    if (!this.instance) {
       this.instance = new ConfigService(process.env);
     }
     return this.instance;

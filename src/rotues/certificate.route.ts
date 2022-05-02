@@ -1,19 +1,26 @@
 import { Router } from "express";
-import { NFTStorage as Storage, Blob } from "nft.storage";
-import { configService } from "../config/config.service";
+import { ipfsService } from "../services";
 const route = Router();
+//<Params,ResBody,ReqBody,ReqQuery,Locals>
+interface CIDQuery {
+  cid: string;
+}
 
 route.get("/create", async (req, res) => {
   try {
-    const blob = new Blob([JSON.stringify({ message: "Jaime es muy Gay" })]);
-    // create a new NFTStorage client using our API key
-    const ipfsStorage = new Storage({
-      token: configService.get("STORAGE_KEY"),
-    });
-
-    const result = await ipfsStorage.storeBlob(blob);
-
+    const result = await ipfsService.upload({ message: "Example Test" });
     res.status(200).json({ ipfsHash: result });
+  } catch (e: any) {
+    res.status(500).json({ message: e.message });
+    console.error(e);
+  }
+});
+
+route.get<{}, {}, {}, CIDQuery>("/", async (req, res) => {
+  const { cid } = req.query;
+  try {
+    let response = await ipfsService.get(cid);
+    res.status(200).json(response.data);
   } catch (e: any) {
     res.status(500).json({ message: e.message });
     console.error(e);
