@@ -7,7 +7,7 @@ dotEnvConfig();
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.0",
+    version: "0.8.1",
     settings: {
       optimizer: {
         enabled: true,
@@ -37,3 +37,5 @@ const config: HardhatUserConfig = {
     timeout: 60000,
   },
 };
+
+export default config;
