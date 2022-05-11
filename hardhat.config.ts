@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
     },
   },
   namedAccounts: {
-    deployer: 0,
+    admin: 0,
   },
   paths: {
     root: "./solidity", //better organization

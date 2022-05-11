@@ -13,13 +13,14 @@ interface CIDQuery {
 
 interface CreateBody {
   metadata: Object;
-  owner: string;
+  ownerPk: string;
   authPk: string;
 }
 
 route.post<{}, {}, CreateBody>("/create", async (req, res) => {
   try {
     const pk = decodePrivateKey(req.body.authPk);
+    const owner = new Wallet(decodePrivateKey(req.body.ownerPk)).address;
     const result = await ipfsService.upload(req.body.metadata);
     const provider = new JsonRpcProvider("http://localhost:8545");
     //TODO connect to provider
@@ -28,11 +29,11 @@ route.post<{}, {}, CreateBody>("/create", async (req, res) => {
       configService.get("CONTRACT_ADDR"),
       auth
     );
-    const tx = await contract.addCertificate(req.body.owner, result);
+    const tx = await contract.addCertificate(owner, result);
     //wait for mined
     await tx.wait();
 
-    const events = await contract.queryMintingEventForAddress(req.body.owner);
+    const events = await contract.queryMintingEventForAddress(owner);
     const tkId = events[events.length - 1].args.tokenId.toString();
     res.status(200).json({ ipfsHash: result, tkId });
   } catch (e: any) {
