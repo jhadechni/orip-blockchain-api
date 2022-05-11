@@ -10,7 +10,7 @@
     "compile": "yarn hardhat compile",
     "node": "yarn hardhat node",
     "clean": "yarn hardhat clean",
-    "typechain:generate": "yarn typechain --target ethers-v5 --out-dir src/typechain solidity/artifacts/contracts/**/+([a-zA-Z0-9_]).json"
+    "typechain:generate": "yarn typechain --target ethers-v5 --out-dir src/typechain solidity/artifacts/contracts/**/'+([a-zA-Z0-9_])'.json"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",

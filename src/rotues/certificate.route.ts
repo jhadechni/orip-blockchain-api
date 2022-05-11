@@ -1,3 +1,4 @@
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { Wallet } from "ethers";
 import { Router } from "express";
 import { configService } from "../config/config.service";
@@ -20,8 +21,9 @@ route.post<{}, {}, CreateBody>("/create", async (req, res) => {
   try {
     const pk = decodePrivateKey(req.body.authPk);
     const result = await ipfsService.upload(req.body.metadata);
+    const provider = new JsonRpcProvider("http://localhost:8545");
     //TODO connect to provider
-    const auth = new Wallet(pk);
+    const auth = new Wallet(pk).connect(provider);
     const contract = new CertificateContract(
       configService.get("CONTRACT_ADDR"),
       auth
@@ -49,5 +51,16 @@ route.get<{}, {}, {}, CIDQuery>("/", async (req, res) => {
     console.error(e);
   }
 });
+
+route.get("/block", async (req, res) => {
+  try{
+    const provider = new JsonRpcProvider("http://localhost:8545");
+    const block = await provider.getBlockNumber();
+    res.status(200).json({data: block});
+  }catch(e: any){
+    res.status(500).json({ message: e.message });
+    console.error(e);
+  }
+})
 
 export default route;
