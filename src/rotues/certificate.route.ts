@@ -22,7 +22,12 @@ route.post<{}, {}, CreateBody>("/create", async (req, res) => {
     const pk = decodePrivateKey(req.body.authPk);
     const owner = new Wallet(decodePrivateKey(req.body.ownerPk)).address;
     const result = await ipfsService.upload(req.body.metadata);
-    const provider = new JsonRpcProvider("http://localhost:8545");
+    const provider = new JsonRpcProvider(
+      configService.get(
+        "TESTNET_URL",
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      )
+    );
     //TODO connect to provider
     const auth = new Wallet(pk).connect(provider);
     const contract = new CertificateContract(
@@ -54,14 +59,14 @@ route.get<{}, {}, {}, CIDQuery>("/", async (req, res) => {
 });
 
 route.get("/block", async (req, res) => {
-  try{
+  try {
     const provider = new JsonRpcProvider("http://localhost:8545");
     const block = await provider.getBlockNumber();
-    res.status(200).json({data: block});
-  }catch(e: any){
+    res.status(200).json({ data: block });
+  } catch (e: any) {
     res.status(500).json({ message: e.message });
     console.error(e);
   }
-})
+});
 
 export default route;

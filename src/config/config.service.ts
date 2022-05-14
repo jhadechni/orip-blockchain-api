@@ -17,11 +17,11 @@ class ConfigService {
     }
     return this.instance;
   }
-  get(key: string): string {
+  get(key: string, def = ""): string {
     if (!this.envConfig[key]) {
       throw new Error(`Env var ${key} is not defined`);
     }
-    return this.envConfig[key] || "";
+    return this.envConfig[key] || def;
   }
 }
 

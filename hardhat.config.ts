@@ -2,6 +2,7 @@ import { config as dotEnvConfig } from "dotenv";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy";
 import "@typechain/hardhat";
+import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig } from "hardhat/types";
 dotEnvConfig();
 
@@ -24,6 +25,23 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
+      chainId: 1337,
+    },
+    ganache: {
+      url: "http://127.0.0.1:8545",
+      chainId: 1337,
+      accounts: [process.env.ADMIN_KEY!],
+    },
+    testnet: {
+      url:
+        process.env.TESTNET_URL ||
+        "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      accounts: [process.env.ADMIN_KEY!],
+    },
+  },
+  etherscan: {
+    apiKey: {
+      bscTestnet: process.env.ETHERSCAN_API_KEY!,
     },
   },
   mocha: {

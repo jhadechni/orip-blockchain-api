@@ -3,9 +3,10 @@ pragma solidity ^0.8.1;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @dev https://eips.ethereum.org/EIPS/eip-721
-contract CertificadoTIL is ERC721URIStorage {
+contract CertificadoTIL is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     //Emitido cuando un certificado se actualiza
@@ -18,6 +19,7 @@ contract CertificadoTIL is ERC721URIStorage {
     /// @dev emits the Transfer event
     function addCertificado(address _owner, string memory tokenURI)
         external
+        onlyOwner
         returns (uint256)
     {
         uint256 newItemId = _tokenIds.current();
@@ -31,6 +33,7 @@ contract CertificadoTIL is ERC721URIStorage {
     /// changes its address
     function updateCertificado(uint256 _tokenId, string memory _newTokenURI)
         external
+        onlyOwner
         returns (bool)
     {
         _setTokenURI(_tokenId, _newTokenURI);
