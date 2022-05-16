@@ -7,8 +7,8 @@ import { ipfsService } from "../services";
 import CertificateContract from "../services/contract";
 const route = Router();
 //<Params,ResBody,ReqBody,ReqQuery,Locals>
-interface CIDQuery {
-  cid: string;
+interface TokenQuery {
+  tkid: number;
 }
 
 interface CreateBody {
@@ -47,11 +47,24 @@ route.post<{}, {}, CreateBody>("/create", async (req, res) => {
   }
 });
 
-route.get<{}, {}, {}, CIDQuery>("/", async (req, res) => {
-  const { cid } = req.query;
+route.get<TokenQuery>("/:tkid", async (req, res) => {
+  const { tkid } = req.params;
   try {
-    let response = await ipfsService.get(cid);
-    res.status(200).json(response.data);
+    const provider = new JsonRpcProvider(
+      configService.get(
+        "TESTNET_URL",
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      )
+    );
+    const contract = new CertificateContract(
+      configService.get("CONTRACT_ADDR"),
+      provider
+    );
+    //get the hash
+    const ipfsHash = await contract.instance().tokenURI(tkid);
+    //get the data
+    let response = await ipfsService.get(ipfsHash);
+    res.status(200).json({ data: response.data });
   } catch (e: any) {
     res.status(500).json({ message: e.message });
     console.error(e);
@@ -60,7 +73,12 @@ route.get<{}, {}, {}, CIDQuery>("/", async (req, res) => {
 
 route.get("/block", async (req, res) => {
   try {
-    const provider = new JsonRpcProvider("http://localhost:8545");
+    const provider = new JsonRpcProvider(
+      configService.get(
+        "TESTNET_URL",
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      )
+    );
     const block = await provider.getBlockNumber();
     res.status(200).json({ data: block });
   } catch (e: any) {
