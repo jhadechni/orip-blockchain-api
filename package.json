@@ -7,6 +7,7 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
+    "test": "yarn hardhat test",
     "compile": "yarn hardhat compile",
     "node": "yarn hardhat node",
     "clean": "yarn hardhat clean",
@@ -17,7 +18,7 @@
     "typechain:generate": "yarn typechain --target ethers-v5 --out-dir src/typechain 'solidity/artifacts/contracts/**/+([a-zA-Z0-9_]).json'"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@openzeppelin/contracts": "^4.6.0",
     "@typechain/ethers-v5": "^10.0.0",
@@ -25,6 +26,7 @@
     "@types/chai": "^4.3.1",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/mocha": "^9.1.1",
     "@types/morgan": "^1.9.3",
     "chai": "^4.3.6",
     "chai-ethers": "^0.0.1",
