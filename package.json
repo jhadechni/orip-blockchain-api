@@ -1,11 +1,12 @@
 {
   "name": "orip-blockchain-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "build/index.js",
   "license": "MIT",
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
+    "test": "mocha",
     "build": "tsc",
     "test": "yarn hardhat test",
     "compile": "yarn hardhat compile",
@@ -14,7 +15,8 @@
     "deploy": "yarn hardhat deploy",
     "verify": "yarn hardhat verify",
     "run:hardhat": "yarn hardhat run",
-    "postinstall": "yarn run compile && yarn run typechain:generate",
+    "test:hardhat": "yarn hardhat test",
+    "postinstall": "yarn run compile && yarn run typechain:generate && yarn run build",
     "typechain:generate": "yarn typechain --target ethers-v5 --out-dir src/typechain 'solidity/artifacts/contracts/**/+([a-zA-Z0-9_]).json'"
   },
   "devDependencies": {
@@ -30,7 +32,7 @@
     "@types/morgan": "^1.9.3",
     "chai": "^4.3.6",
     "chai-ethers": "^0.0.1",
-    "dotenv": "^16.0.0",
+    "chai-http": "^4.3.0",
     "hardhat": "^2.9.3",
     "hardhat-deploy": "^0.11.4",
     "nodemon": "^2.0.15",
@@ -41,9 +43,13 @@
   "dependencies": {
     "axios": "^0.27.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
     "ethers": "^5.6.4",
     "express": "^4.18.0",
     "morgan": "^1.10.0",
     "nft.storage": "^6.2.0"
+  },
+  "engines": {
+    "node": "^16.0.0"
   }
 }
