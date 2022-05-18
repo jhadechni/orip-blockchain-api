@@ -6,7 +6,7 @@
   "extension": ["ts"],
   "recursive": true,
   "reporter": "spec",
-  "require": ["ts-node/register"],
+  "require": ["ts-node/register", "test/mocha.env.ts"],
   "slow": 1000,
   "spec": "src/**/*.test.ts",
   "ui": "bdd",

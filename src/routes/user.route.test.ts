@@ -1,14 +1,21 @@
-import app from "../index";
 import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
+import nock from "nock";
 chai.use(chaiHttp);
 
+const URL = "http://localhost:8080";
+
 describe("createIdentity", () => {
-  const server = chai.request(app);
-  it("/createIdentity", (done) => {
+  before(() => {
+    nock(URL).get("/users/createIdentity").reply(200, {
+      key: "0x1231123123",
+    });
+  });
+  const server = chai.request(URL);
+  it("createIdentity", (done) => {
     server.get("/users/createIdentity").end((err, res) => {
       expect(res).to.have.status(200);
-      expect(res.body.key).to.have.lengthOf(160);
+      expect(res.body.key).to.equals("0x1231123123");
       done();
     });
   });
