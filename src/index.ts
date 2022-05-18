@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import configRoutes from "./rotues";
+import configRoutes from "./routes";
 
 const app = express();
 
@@ -21,3 +21,5 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`App listening in PORT ${PORT}`);
 });
+
+export default app;

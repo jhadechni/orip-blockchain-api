@@ -1,0 +1,15 @@
+{
+  "allow-uncaught": true,
+  "diff": true,
+  "bail": true,
+  "exit": true,
+  "extension": ["ts"],
+  "recursive": true,
+  "reporter": "spec",
+  "require": ["ts-node/register"],
+  "slow": 1000,
+  "spec": "src/**/*.test.ts",
+  "ui": "bdd",
+  "timeout": 20000,
+  "watch": false
+}
