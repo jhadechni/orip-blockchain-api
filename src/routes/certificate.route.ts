@@ -28,6 +28,12 @@ interface UpdateBody {
   authPk: string;
 }
 
+interface TransferBody {
+  fromPk: string;
+  toPk: string;
+  tokenId: BigNumberish;
+}
+
 enum TxStatus {
   SUCCESS = "SUCCESS",
   ERROR = "ERROR",
@@ -49,6 +55,14 @@ interface UpdateResBody {
   timestamp: number;
   fee: number;
   prevOwner: string | null;
+  currentOwner: string;
+  status: TxStatus;
+}
+interface TransferResBody {
+  txHash: string;
+  timestamp: number;
+  fee: number;
+  prevOwner: string;
   currentOwner: string;
   status: TxStatus;
 }
@@ -111,7 +125,6 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
           "https://data-seed-prebsc-1-s1.binance.org:8545/"
         )
       );
-      //TODO connect to provider
       const auth = new Wallet(pk).connect(provider);
       const contract = new CertificateContract(
         configService.get("CONTRACT_ADDR"),
@@ -138,6 +151,48 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
         fee,
         currentOwner: owner,
         prevOwner: null,
+        status: receipt.status === 0 ? TxStatus.ERROR : TxStatus.SUCCESS,
+        timestamp: block.timestamp,
+      });
+    } catch (e: any) {
+      res.status(500).json({ message: e.message });
+      console.error(e);
+    }
+  }
+);
+
+route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
+  "/transfer",
+  async (req, res) => {
+    const { fromPk, toPk, tokenId } = req.body;
+    try {
+      const from = decodePrivateKey(fromPk);
+      const to = new Wallet(decodePrivateKey(toPk)).address;
+      const provider = new JsonRpcProvider(
+        configService.get(
+          "TESTNET_URL",
+          "https://data-seed-prebsc-1-s1.binance.org:8545/"
+        )
+      );
+      const fromAuth = new Wallet(from).connect(provider);
+      const contract = new CertificateContract(
+        configService.get("CONTRACT_ADDR"),
+        fromAuth
+      );
+
+      const tx = await contract.transferToken(fromAuth.address, to, tokenId);
+      const receipt = await tx.wait();
+
+      const fee = receipt.gasUsed
+        .mul(receipt.effectiveGasPrice)
+        .div(parseEther("1"))
+        .toNumber();
+      const block = await provider.getBlock(receipt.blockNumber);
+      res.status(200).json({
+        txHash: tx.hash,
+        fee,
+        currentOwner: toPk,
+        prevOwner: fromPk,
         status: receipt.status === 0 ? TxStatus.ERROR : TxStatus.SUCCESS,
         timestamp: block.timestamp,
       });

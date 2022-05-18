@@ -27,7 +27,9 @@ export default class CertificateContract {
   getUriFromTokenId(tokenId: BigNumberish) {
     return this.contract.tokenURI(tokenId);
   }
-  transferToken(from: string, to: string, tokenId: BigNumberish) {}
+  transferToken(from: string, to: string, tokenId: BigNumberish) {
+    return this.contract.transferFrom(from, to, tokenId);
+  }
   instance() {
     return this.contract;
   }
