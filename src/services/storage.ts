@@ -16,7 +16,7 @@ class IPFSStorage {
     }
     return this.instance;
   }
-  upload(json: Object) {
+  upload(json: any) {
     return this.storage.storeBlob(new Blob([JSON.stringify(json)]));
   }
   delete(cid: string) {

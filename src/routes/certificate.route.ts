@@ -16,21 +16,27 @@ interface TokenQuery {
 }
 
 interface CreateBody {
-  metadata: Object;
-  ownerPk: string;
-  authPk: string;
+  data: {
+    metadata: Object;
+    ownerPk: string;
+    authPk: string;
+  };
 }
 
 interface UpdateBody {
-  metadata: Object;
-  tokenId: BigNumberish;
-  authPk: string;
+  data: {
+    metadata: any;
+    tokenId: BigNumberish;
+    authPk: string;
+  };
 }
 
 interface TransferBody {
-  fromPk: string;
-  toPk: string;
-  tokenId: BigNumberish;
+  data: {
+    fromPk: string;
+    toPk: string;
+    tokenId: BigNumberish;
+  };
 }
 
 enum TxStatus {
@@ -70,9 +76,9 @@ route.post<{}, BodyResponse<CreateResBody>, CreateBody>(
   "/create",
   async (req, res) => {
     try {
-      const pk = decodePrivateKey(req.body.authPk);
-      const owner = new Wallet(decodePrivateKey(req.body.ownerPk)).address;
-      const result = await ipfsService.upload(req.body.metadata);
+      const pk = decodePrivateKey(req.body.data.authPk);
+      const owner = new Wallet(decodePrivateKey(req.body.data.ownerPk)).address;
+      const result = await ipfsService.upload(req.body.data.metadata);
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",
@@ -116,8 +122,8 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
   "/update",
   async (req, res) => {
     try {
-      const pk = decodePrivateKey(req.body.authPk);
-      const ipfs = await ipfsService.upload(req.body.metadata);
+      const pk = decodePrivateKey(req.body.data.authPk);
+      const ipfs = await ipfsService.upload(req.body.data.metadata);
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",
@@ -129,7 +135,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
         configService.get("CONTRACT_ADDR"),
         auth
       );
-      const tx = await contract.updateCertificate(req.body.tokenId, ipfs);
+      const tx = await contract.updateCertificate(req.body.data.tokenId, ipfs);
       //wait for mined
       const receipt = await tx.wait();
       /**
@@ -143,7 +149,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
         .div(parseEther("1"))
         .toNumber();
       const block = await provider.getBlock(receipt.blockNumber);
-      const owner = await contract.getOwnerOfTokenId(req.body.tokenId);
+      const owner = await contract.getOwnerOfTokenId(req.body.data.tokenId);
       res.status(200).json({
         ipfsHash: ipfs,
         txHash: tx.hash,
@@ -163,7 +169,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
 route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
   "/transfer",
   async (req, res) => {
-    const { fromPk, toPk, tokenId } = req.body;
+    const { fromPk, toPk, tokenId } = req.body.data;
     try {
       const from = decodePrivateKey(fromPk);
       const to = new Wallet(decodePrivateKey(toPk)).address;
