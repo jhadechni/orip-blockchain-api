@@ -21,6 +21,10 @@ export default class CertificateContract {
     const event = this.contract.filters.TokenUpdated(tokenId);
     return this.contract.queryFilter(event);
   }
+  queryTransferHistory(tokenId: BigNumberish){
+    const event = this.contract.filters.Transfer(null,null,tokenId);
+    return this.contract.queryFilter(event);
+  }
   getOwnerOfTokenId(tokenId: BigNumberish) {
     return this.contract.ownerOf(tokenId);
   }

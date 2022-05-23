@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { BigNumberish, Wallet } from "ethers";
+import { BigNumber, BigNumberish, Wallet } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { Router } from "express";
 import { CIDString } from "nft.storage";
@@ -7,10 +7,9 @@ import { configService } from "../config/config.service";
 import { decodePrivateKey } from "../security";
 import { ipfsService } from "../services";
 import CertificateContract from "../services/contract";
+import { BodyResponse } from "./commo.types";
 const route = Router();
 //<Params,ResBody,ReqBody,ReqQuery,Locals>
-
-type BodyResponse<T> = T | { message: string };
 
 interface TokenQuery {
   tkid: string;
@@ -224,6 +223,39 @@ route.get<TokenQuery>("/:tkid", async (req, res) => {
   } catch (e: any) {
     res.status(500).json({ message: e.message });
     console.error(e);
+  }
+});
+
+interface TransferEvent {
+  from: string;
+  to: string;
+  tokenId: string;
+}
+
+route.get<TokenQuery,BodyResponse<TransferEvent[]>>("/transfers/:tkid", async (req, res) => {
+  const { tkid } = req.params;
+  try {
+    const provider = new JsonRpcProvider(
+      configService.get(
+        "TESTNET_URL",
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      )
+    );
+    const contract = new CertificateContract(
+      configService.get("CONTRACT_ADDR"),
+      provider
+    );
+    //get the event history
+   const tranferEvents = await contract.queryTransferHistory(BigNumber.from(tkid));
+   const parsedEvents: TransferEvent[] = tranferEvents.map(e => ({
+    from: e.args.from,
+    to: e.args.to,
+    tokenId: e.args.tokenId.toString()
+   }))
+   res.status(200).json(parsedEvents);
+  }catch(e: any){
+    res.status(500).json({message: e.message});
+    console.log(e);
   }
 });
 
