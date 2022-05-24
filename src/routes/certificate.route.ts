@@ -1,6 +1,6 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish, Wallet } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { formatEther, parseEther } from "ethers/lib/utils";
 import { Router } from "express";
 import { CIDString } from "nft.storage";
 import { configService } from "../config/config.service";
@@ -97,10 +97,9 @@ route.post<{}, BodyResponse<CreateResBody>, CreateBody>(
 
       const events = await contract.queryMintingEventForAddress(owner);
       const tokenId = events[events.length - 1].args.tokenId.toString();
-      const fee = receipt.gasUsed
-        .mul(receipt.effectiveGasPrice)
-        .div(parseEther("1"))
-        .toNumber();
+      const fee = parseFloat(
+        formatEther(receipt.gasUsed.mul(tx.gasPrice!).div(parseEther("1")))
+      );
       const block = await provider.getBlock(receipt.blockNumber);
       res.status(200).json({
         ipfsHash: result,
@@ -238,31 +237,36 @@ interface TransferEvent {
   tokenId: string;
 }
 
-route.get<TokenQuery,BodyResponse<TransferEvent[]>>("/transfers/:tkid", async (req, res) => {
-  const { tkid } = req.params;
-  try {
-    const provider = new JsonRpcProvider(
-      configService.get(
-        "TESTNET_URL",
-        "https://data-seed-prebsc-1-s1.binance.org:8545/"
-      )
-    );
-    const contract = new CertificateContract(
-      configService.get("CONTRACT_ADDR"),
-      provider
-    );
-    //get the event history
-   const tranferEvents = await contract.queryTransferHistory(BigNumber.from(tkid));
-   const parsedEvents: TransferEvent[] = tranferEvents.map(e => ({
-    from: e.args.from,
-    to: e.args.to,
-    tokenId: e.args.tokenId.toString()
-   }))
-   res.status(200).json(parsedEvents);
-  }catch(e: any){
-    res.status(500).json({message: e.message});
-    console.log(e);
+route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
+  "/transfers/:tkid",
+  async (req, res) => {
+    const { tkid } = req.params;
+    try {
+      const provider = new JsonRpcProvider(
+        configService.get(
+          "TESTNET_URL",
+          "https://data-seed-prebsc-1-s1.binance.org:8545/"
+        )
+      );
+      const contract = new CertificateContract(
+        configService.get("CONTRACT_ADDR"),
+        provider
+      );
+      //get the event history
+      const tranferEvents = await contract.queryTransferHistory(
+        BigNumber.from(tkid)
+      );
+      const parsedEvents: TransferEvent[] = tranferEvents.map((e) => ({
+        from: e.args.from,
+        to: e.args.to,
+        tokenId: e.args.tokenId.toString(),
+      }));
+      res.status(200).json(parsedEvents);
+    } catch (e: any) {
+      res.status(500).json({ message: e.message });
+      console.log(e);
+    }
   }
-});
+);
 
 export default route;
