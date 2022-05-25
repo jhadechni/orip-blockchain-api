@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+          cache: 'npm'
 
       - name: npm install, build, and test
         env:
@@ -35,12 +36,17 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
+      # Zip artifacts to speed things up
+      - name: Zip artifact for deployment
+         # We exclude node_modules and dist because the Azure Oryx/Kudu deploy runs npm install and rebuilds everything anyway...
+         # If we zip them we just increase the size of the zip file and it's not needed
+        run: zip release.zip ./* -qr -x "node_modules/*" "dist/*" "build/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: .
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,6 +60,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: node-app
+      # Unzip before
+      - name: Unzip artifact for deployment
+        run: |
+          unzip -q release.zip
+          rm release.zip
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
