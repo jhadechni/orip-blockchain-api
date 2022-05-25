@@ -65,6 +65,12 @@ jobs:
         run: |
           unzip -q release.zip
           rm release.zip
+      - name: npm install
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+        run: |
+          npm install
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
