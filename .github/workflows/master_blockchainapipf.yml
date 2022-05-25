@@ -21,7 +21,6 @@ jobs:
         with:
           node-version: '16.x'
       - name: Test env vars
-        shell: bash
         run: echo 'Admin: $ADMIN_KEY'
 
       - name: npm install, build, and test
