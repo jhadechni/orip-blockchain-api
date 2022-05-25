@@ -20,18 +20,32 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+          cache: 'npm'
 
       - name: npm install, build, and test
+        env:
+          ADMIN_KEY: ${{secrets.ADMIN_KEY}}
+          TESTNET_URL: ${{secrets.TESTNET_URL}}
+          ETHERSCAN_API_KEY: ${{secrets.ETHERSCAN_API_KEY}}
+          ALGORITHM: ${{secrets.ALGORITHM}}
+          SECURITY_KEY: ${{secrets.SECURITY_KEY}}
+          INIT_VECTOR: ${{secrets.INIT_VECTOR}}
+          STORAGE_KEY: ${{secrets.STORAGE_KEY}}
+          CONTRACT_ADDR: ${{secrets.CONTRACT_ADDR}}
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
+      # Zip artifacts to speed things up
+      - name: Zip artifact for deployment
+        #Zip everuthing including node_modules
+        run: zip release.zip ./* -qr
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: .
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,4 +67,4 @@ jobs:
           app-name: 'blockchainapipf'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E56BCD81F31B46919DA92BE6EB37F578 }}
-          package: .
+          package: release.zip
