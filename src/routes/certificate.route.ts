@@ -1,6 +1,11 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish, Wallet } from "ethers";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from "ethers/lib/utils";
 import { Router } from "express";
 import { CIDString } from "nft.storage";
 import { configService } from "../config/config.service";
@@ -49,7 +54,7 @@ interface CreateResBody {
   tokenId: string;
   txHash: string;
   timestamp: number;
-  fee: number;
+  fee: string;
   prevOwner: string | null;
   currentOwner: string;
   status: TxStatus;
@@ -58,7 +63,7 @@ interface UpdateResBody {
   ipfsHash: CIDString;
   txHash: string;
   timestamp: number;
-  fee: number;
+  fee: string;
   prevOwner: string | null;
   currentOwner: string;
   status: TxStatus;
@@ -66,7 +71,7 @@ interface UpdateResBody {
 interface TransferResBody {
   txHash: string;
   timestamp: number;
-  fee: number;
+  fee: string;
   prevOwner: string;
   currentOwner: string;
   status: TxStatus;
@@ -97,9 +102,7 @@ route.post<{}, BodyResponse<CreateResBody>, CreateBody>(
 
       const events = await contract.queryMintingEventForAddress(owner);
       const tokenId = events[events.length - 1].args.tokenId.toString();
-      const fee = parseFloat(
-        formatEther(receipt.gasUsed.mul(tx.gasPrice!).div(parseEther("1")))
-      );
+      const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
       const block = await provider.getBlock(receipt.blockNumber);
       res.status(200).json({
         ipfsHash: result,
@@ -143,10 +146,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
           On EIP-1559 chains, this is equal to the block baseFee for the block that the transaction was included in, plus the transaction 
           maxPriorityFeePerGas clamped to the transaction maxFeePerGas.
        */
-      const fee = receipt.gasUsed
-        .mul(receipt.effectiveGasPrice)
-        .div(parseEther("1"))
-        .toNumber();
+      const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
       const block = await provider.getBlock(receipt.blockNumber);
       const owner = await contract.getOwnerOfTokenId(req.body.data.tokenId);
       res.status(200).json({
@@ -187,10 +187,7 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
       const tx = await contract.transferToken(fromAuth.address, to, tokenId);
       const receipt = await tx.wait();
 
-      const fee = receipt.gasUsed
-        .mul(receipt.effectiveGasPrice)
-        .div(parseEther("1"))
-        .toNumber();
+      const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
       const block = await provider.getBlock(receipt.blockNumber);
       res.status(200).json({
         txHash: tx.hash,
