@@ -70,6 +70,15 @@ jobs:
         with:
           node-version: '16.x'
       - name: npm install
+        env:
+          ADMIN_KEY: ${{secrets.ADMIN_KEY}}
+          TESTNET_URL: ${{secrets.TESTNET_URL}}
+          ETHERSCAN_API_KEY: ${{secrets.ETHERSCAN_API_KEY}}
+          ALGORITHM: ${{secrets.ALGORITHM}}
+          SECURITY_KEY: ${{secrets.SECURITY_KEY}}
+          INIT_VECTOR: ${{secrets.INIT_VECTOR}}
+          STORAGE_KEY: ${{secrets.STORAGE_KEY}}
+          CONTRACT_ADDR: ${{secrets.CONTRACT_ADDR}}
         run: |
           npm install
 
