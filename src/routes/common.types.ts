@@ -8,3 +8,8 @@ export interface CertificateMetadata {
   actValue: string;
   city: string;
 }
+
+export enum TxStatus {
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
+}

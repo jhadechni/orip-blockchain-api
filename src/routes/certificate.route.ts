@@ -11,8 +11,8 @@ import { CIDString } from "nft.storage";
 import { configService } from "../config/config.service";
 import { decodePrivateKey } from "../security";
 import { ipfsService } from "../services";
-import CertificateContract from "../services/contract";
-import { BodyResponse, CertificateMetadata } from "./common.types";
+import CertificateContract from "../services/certificateContract";
+import { BodyResponse, CertificateMetadata, TxStatus } from "./common.types";
 const route = Router();
 //<Params,ResBody,ReqBody,ReqQuery,Locals>
 
@@ -43,11 +43,6 @@ interface TransferBody {
     metadata: CertificateMetadata;
     tokenId: BigNumberish;
   };
-}
-
-enum TxStatus {
-  SUCCESS = "SUCCESS",
-  ERROR = "ERROR",
 }
 
 interface CreateResBody {
@@ -94,7 +89,7 @@ route.post<{}, BodyResponse<CreateResBody>, CreateBody>(
       //TODO connect to provider
       const auth = new Wallet(pk).connect(provider);
       const contract = new CertificateContract(
-        configService.get("CONTRACT_ADDR"),
+        configService.get("CERTIFICATE_CONTRACT"),
         auth
       );
       const tx = await contract.addCertificate(owner, result);
@@ -135,7 +130,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
       );
       const auth = new Wallet(pk).connect(provider);
       const contract = new CertificateContract(
-        configService.get("CONTRACT_ADDR"),
+        configService.get("CERTIFICATE_CONTRACT"),
         auth
       );
       const tx = await contract.updateCertificate(req.body.data.tokenId, ipfs);
@@ -181,7 +176,7 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
       );
       const fromAuth = new Wallet(from).connect(provider);
       const contract = new CertificateContract(
-        configService.get("CONTRACT_ADDR"),
+        configService.get("CERTIFICATE_CONTRACT"),
         fromAuth
       );
       const ipfs = await ipfsService.upload(metadata);
@@ -220,7 +215,7 @@ route.get<TokenQuery>("/:tkid", async (req, res) => {
       )
     );
     const contract = new CertificateContract(
-      configService.get("CONTRACT_ADDR"),
+      configService.get("CERTIFICATE_CONTRACT"),
       provider
     );
     //get the hash
@@ -252,7 +247,7 @@ route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
         )
       );
       const contract = new CertificateContract(
-        configService.get("CONTRACT_ADDR"),
+        configService.get("CERTIFICATE_CONTRACT"),
         provider
       );
       //get the event history
