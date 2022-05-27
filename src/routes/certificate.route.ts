@@ -95,9 +95,7 @@ route.post<{}, BodyResponse<CreateResBody>, CreateBody>(
       const tx = await contract.addCertificate(owner, result);
       //wait for mined
       const receipt = await tx.wait();
-
-      const events = await contract.queryMintingEventForAddress(owner);
-      const tokenId = events[events.length - 1].args.tokenId.toString();
+      const tokenId = receipt.events![0].args!.tokenId.toString();
       const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
       const block = await provider.getBlock(receipt.blockNumber);
       res.status(200).json({
@@ -233,6 +231,7 @@ interface TransferEvent {
   from: string;
   to: string;
   tokenId: string;
+  tokenUri: string;
 }
 
 route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
@@ -258,6 +257,7 @@ route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
         from: e.args.from,
         to: e.args.to,
         tokenId: e.args.tokenId.toString(),
+        tokenUri: e.args.tokenUri,
       }));
       res.status(200).json(parsedEvents);
     } catch (e: any) {

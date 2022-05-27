@@ -1,6 +1,7 @@
 import { BigNumberish, constants, Signer } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import { PQRSD, PQRSD__factory } from "../typechain";
+import { formatBytes32String } from "ethers/lib/utils";
 
 export default class PQRSDContract {
   private contract: PQRSD;
@@ -16,8 +17,17 @@ export default class PQRSDContract {
   close(tokenId: BigNumberish) {
     return this.contract.close(tokenId);
   }
+  decodeCreateLog() {}
   queryCreateEventForAddress(from: string) {
-    const event = this.contract.filters.StatusChanged(from, null, "CREATED");
+    const event = this.contract.filters.StatusChanged(
+      from,
+      null,
+      formatBytes32String("CREATED")
+    );
+    return this.contract.queryFilter(event);
+  }
+  queryHistoryOfPQRSD(tokenId: BigNumberish) {
+    const event = this.contract.filters.StatusChanged(null, tokenId, null);
     return this.contract.queryFilter(event);
   }
 
