@@ -8,7 +8,7 @@ async function main() {
   );
   // We get the contract to deploy
   const ContractFactory = await ethers.getContractFactory("CertificadoTIL");
-  const contract = await ContractFactory.deploy();
+  const contract = await ContractFactory.deploy([]);
 
   console.log("Certificado TIL deployed to:", contract.address);
   console.log(`Gas price: ${contract.deployTransaction.gasPrice}`);

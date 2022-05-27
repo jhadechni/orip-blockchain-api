@@ -1,10 +1,10 @@
-import { BigNumber, Contract } from 'ethers';
+import { BigNumber, Contract } from "ethers";
 import {
   ethers,
   deployments,
   getNamedAccounts,
-  getUnnamedAccounts
-} from 'hardhat';
+  getUnnamedAccounts,
+} from "hardhat";
 
 /**
  * Connect a series of accounts to a series of contracts
@@ -44,7 +44,7 @@ export async function setup<T extends Contract>(name: string) {
   await deployments.fixture([name]); //This line allow to execute the corresponding deploy script prior to the test
   // we get an instantiated contract in the form of a ethers.js Contract instance:
   const contracts = {
-    DeployedContract: (await ethers.getContract(name)) as T
+    DeployedContract: (await ethers.getContract(name)) as T,
   };
 
   // we get the tokenOwner
@@ -54,6 +54,6 @@ export async function setup<T extends Contract>(name: string) {
   return {
     ...contracts,
     users,
-    deployer: await setupUser(admin, contracts)
+    deployer: await setupUser(admin, contracts),
   };
 }

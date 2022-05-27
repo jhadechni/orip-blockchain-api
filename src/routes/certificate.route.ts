@@ -12,7 +12,7 @@ import { configService } from "../config/config.service";
 import { decodePrivateKey } from "../security";
 import { ipfsService } from "../services";
 import CertificateContract from "../services/contract";
-import { BodyResponse } from "./commo.types";
+import { BodyResponse, CertificateMetadata } from "./common.types";
 const route = Router();
 //<Params,ResBody,ReqBody,ReqQuery,Locals>
 
@@ -22,7 +22,7 @@ interface TokenQuery {
 
 interface CreateBody {
   data: {
-    metadata: Object;
+    metadata: CertificateMetadata;
     ownerPk: string;
     authPk: string;
   };
@@ -30,7 +30,7 @@ interface CreateBody {
 
 interface UpdateBody {
   data: {
-    metadata: any;
+    metadata: CertificateMetadata;
     tokenId: BigNumberish;
     authPk: string;
   };
@@ -40,6 +40,7 @@ interface TransferBody {
   data: {
     fromPk: string;
     toPk: string;
+    metadata: CertificateMetadata;
     tokenId: BigNumberish;
   };
 }
@@ -168,7 +169,7 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
 route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
   "/transfer",
   async (req, res) => {
-    const { fromPk, toPk, tokenId } = req.body.data;
+    const { fromPk, toPk, tokenId, metadata } = req.body.data;
     try {
       const from = decodePrivateKey(fromPk);
       const to = new Wallet(decodePrivateKey(toPk)).address;
@@ -183,8 +184,13 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
         configService.get("CONTRACT_ADDR"),
         fromAuth
       );
-
-      const tx = await contract.transferToken(fromAuth.address, to, tokenId);
+      const ipfs = await ipfsService.upload(metadata);
+      const tx = await contract.compraVenta(
+        fromAuth.address,
+        to,
+        tokenId,
+        ipfs
+      );
       const receipt = await tx.wait();
 
       const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
@@ -250,7 +256,7 @@ route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
         provider
       );
       //get the event history
-      const tranferEvents = await contract.queryTransferHistory(
+      const tranferEvents = await contract.queryCompraVentaHistory(
         BigNumber.from(tkid)
       );
       const parsedEvents: TransferEvent[] = tranferEvents.map((e) => ({

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { NFTStorage, Blob } from "nft.storage";
 import { configService } from "../config/config.service";
+import { CertificateMetadata } from "../routes/common.types";
 
 class IPFSStorage {
   private storage: NFTStorage;
@@ -23,7 +24,9 @@ class IPFSStorage {
     return this.storage.delete(cid);
   }
   get(cid: string) {
-    return axios.get(`https://${cid}.ipfs.nftstorage.link/`);
+    return axios.get<CertificateMetadata>(
+      `https://${cid}.ipfs.nftstorage.link/`
+    );
   }
 }
 

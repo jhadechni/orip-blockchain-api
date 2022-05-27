@@ -11,18 +11,18 @@ export default class CertificateContract {
     return this.contract.addCertificado(owner, ipfsHash);
   }
   updateCertificate(id: BigNumberish, ipfsHash: string) {
-    return this.contract.updateCertificado(id, ipfsHash);
+    return this.contract.anotacion(id, ipfsHash);
   }
   queryMintingEventForAddress(to: string) {
     const event = this.contract.filters.Transfer(constants.AddressZero, to);
     return this.contract.queryFilter(event);
   }
-  queryUpdateEventForToken(tokenId: BigNumberish) {
-    const event = this.contract.filters.TokenUpdated(tokenId);
+  queryAnnotationsForToken(tokenId: BigNumberish) {
+    const event = this.contract.filters.Anotacion(tokenId);
     return this.contract.queryFilter(event);
   }
-  queryTransferHistory(tokenId: BigNumberish){
-    const event = this.contract.filters.Transfer(null,null,tokenId);
+  queryCompraVentaHistory(tokenId: BigNumberish) {
+    const event = this.contract.filters.CompraVenta(null, null, tokenId);
     return this.contract.queryFilter(event);
   }
   getOwnerOfTokenId(tokenId: BigNumberish) {
@@ -31,8 +31,8 @@ export default class CertificateContract {
   getUriFromTokenId(tokenId: BigNumberish) {
     return this.contract.tokenURI(tokenId);
   }
-  transferToken(from: string, to: string, tokenId: BigNumberish) {
-    return this.contract.transferFrom(from, to, tokenId);
+  compraVenta(from: string, to: string, tokenId: BigNumberish, uri: string) {
+    return this.contract.compraVenta(from, to, tokenId, uri);
   }
   instance() {
     return this.contract;

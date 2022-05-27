@@ -15,6 +15,9 @@ describe("Certificate", () => {
           name: "Jaime",
         },
       });
+    nock(URL).post("/certificate/create").reply(200, {
+      txHash: "0x123",
+    });
   });
   const server = chai.request(URL);
   it("getCertificateMetadata", (done) => {
@@ -22,6 +25,15 @@ describe("Certificate", () => {
       expect(res).to.have.status(200);
       expect(res.body.data).to.deep.equal({
         name: "Jaime",
+      });
+      done();
+    });
+  });
+  it("create", (done) => {
+    server.post(`/certificate/create`).end((err, res) => {
+      expect(res).to.have.status(200);
+      expect(res.body.data).to.deep.equal({
+        txHash: "0x123",
       });
       done();
     });
