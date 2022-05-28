@@ -19,41 +19,25 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: "16.x"
-          cache: "npm"
+          node-version: '16.x'
 
       - name: npm install, build, and test
-        env:
-          ADMIN_KEY: ${{secrets.ADMIN_KEY}}
-          TESTNET_URL: ${{secrets.TESTNET_URL}}
-          ETHERSCAN_API_KEY: ${{secrets.ETHERSCAN_API_KEY}}
-          ALGORITHM: ${{secrets.ALGORITHM}}
-          SECURITY_KEY: ${{secrets.SECURITY_KEY}}
-          INIT_VECTOR: ${{secrets.INIT_VECTOR}}
-          STORAGE_KEY: ${{secrets.STORAGE_KEY}}
-          CONTRACT_ADDR: ${{secrets.CONTRACT_ADDR}}
-          CERTIFICATE_CONTRACT: ${{secrets.CERTIFICATE_CONTRACT}}
-          PQRSD_CONTRACT: ${{secrets.PQRSD_CONTRACT}}
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-      # Zip artifacts to speed things up
-      - name: Zip artifact for deployment
-        #Zip everuthing including node_modules
-        run: zip release.zip ./* -qr
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: "Production"
+      name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -62,11 +46,11 @@ jobs:
         with:
           name: node-app
 
-      - name: "Deploy to Azure Web App"
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "blockchainapipf"
-          slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E56BCD81F31B46919DA92BE6EB37F578 }}
-          package: release.zip
+          app-name: 'blockchainapipf'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ACCEE3496FA84186BE4FD2DA1B63BE62 }}
+          package: .
