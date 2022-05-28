@@ -32,7 +32,7 @@ describe("Certificate", () => {
   it("create", (done) => {
     server.post(`/certificate/create`).end((err, res) => {
       expect(res).to.have.status(200);
-      expect(res.body.data).to.deep.equal({
+      expect(res.body).to.deep.equal({
         txHash: "0x123",
       });
       done();
