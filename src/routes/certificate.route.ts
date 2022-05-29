@@ -162,8 +162,8 @@ route.put<{}, BodyResponse<UpdateResBody>, UpdateBody>(
 route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
   "/transfer",
   async (req, res) => {
-    const { fromPk, toPk, tokenId, metadata } = req.body.data;
     try {
+      const { fromPk, toPk, tokenId, metadata } = req.body.data;
       const from = decodePrivateKey(fromPk);
       const to = new Wallet(decodePrivateKey(toPk)).address;
       const provider = new JsonRpcProvider(
@@ -204,8 +204,8 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
 );
 
 route.get<TokenQuery>("/:tkid", async (req, res) => {
-  const { tkid } = req.params;
   try {
+    const { tkid } = req.params;
     const provider = new JsonRpcProvider(
       configService.get(
         "TESTNET_URL",
@@ -237,8 +237,8 @@ interface TransferEvent {
 route.get<TokenQuery, BodyResponse<TransferEvent[]>>(
   "/transfers/:tkid",
   async (req, res) => {
-    const { tkid } = req.params;
     try {
+      const { tkid } = req.params;
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",

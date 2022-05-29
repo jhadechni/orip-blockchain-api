@@ -34,6 +34,15 @@ export default class CertificateContract {
   compraVenta(from: string, to: string, tokenId: BigNumberish, uri: string) {
     return this.contract.compraVenta(from, to, tokenId, uri);
   }
+  addAdmin(admin: string) {
+    return this.contract.addAdmin(admin);
+  }
+  removeAdmin(admin: string) {
+    return this.contract.removeAdmin(admin);
+  }
+  isAdmin(admin: string) {
+    return this.contract.isAdmin(admin);
+  }
   instance() {
     return this.contract;
   }
