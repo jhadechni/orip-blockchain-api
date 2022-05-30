@@ -173,24 +173,14 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
           "https://data-seed-prebsc-1-s1.binance.org:8545/"
         )
       );
-      const fromAuth = new Wallet(from).connect(provider);
+      const fromAddress = new Wallet(from).address;
       const adminAuth = new Wallet(decodePrivateKey(authPk)).connect(provider);
-      const fromContract = new CertificateContract(
-        configService.get("CERTIFICATE_CONTRACT"),
-        fromAuth
-      );
-      fromContract.approve(adminAuth.address, tokenId);
-      const adminContract = new CertificateContract(
+      const contract = new CertificateContract(
         configService.get("CERTIFICATE_CONTRACT"),
         adminAuth
       );
       const ipfs = await ipfsService.upload(metadata);
-      const tx = await adminContract.compraVenta(
-        fromAuth.address,
-        to,
-        tokenId,
-        ipfs
-      );
+      const tx = await contract.compraVenta(fromAddress, to, tokenId, ipfs);
       const receipt = await tx.wait();
 
       const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));

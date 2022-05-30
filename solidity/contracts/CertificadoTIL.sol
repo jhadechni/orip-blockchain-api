@@ -34,8 +34,8 @@ contract CertificadoTIL is ERC721URIStorage, Ownable {
 
     modifier onlyApprovedOrOwner(uint256 tokenId) {
         require(
-            _isApprovedOrOwner(msg.sender, tokenId),
-            "CertificadoTIL: Caller is not owner nor approved"
+            _isApprovedOrOwner(msg.sender, tokenId) || isAdmin(_msgSender()),
+            "CertificadoTIL: Caller is not token owner nor approved nor an admin"
         );
         _;
     }

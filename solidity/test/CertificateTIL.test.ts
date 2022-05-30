@@ -50,7 +50,7 @@ describe("CertificateTIL", () => {
       // emit Approval(ERC721.ownerOf(tokenId), to, tokenId);
       //Transfer(from, to, tokenId);
       await expect(
-        users[0].DeployedContract.compraVenta(owner, newOwner, 0, "")
+        deployer.DeployedContract.compraVenta(owner, newOwner, 0, "")
       )
         .to.emit(DeployedContract, "CompraVenta")
         .withArgs(owner, newOwner, 0, "");
@@ -91,7 +91,9 @@ describe("CertificateTIL", () => {
           0,
           "NEWLINK"
         )
-      ).to.be.revertedWith("CertificadoTIL: Caller is not owner nor approved");
+      ).to.be.revertedWith(
+        "CertificadoTIL: Caller is not token owner nor approved nor an admin"
+      );
     });
   });
   describe("Admins", () => {
