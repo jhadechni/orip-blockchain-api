@@ -8,8 +8,8 @@ export default class PQRSDContract {
   constructor(address: string, wallet: Signer | Provider) {
     this.contract = PQRSD__factory.connect(address, wallet);
   }
-  create() {
-    return this.contract.create();
+  create(owner: string) {
+    return this.contract.create(owner);
   }
   update(tokenId: BigNumberish, state: string) {
     return this.contract.update(tokenId, state);

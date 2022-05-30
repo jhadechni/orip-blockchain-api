@@ -47,21 +47,21 @@ type UpdatePQRSDResponse = Omit<CreatePQRSDResponse, "tokenId">;
 route.post<{}, BodyResponse<CreatePQRSDResponse>, CreatePQRSD>(
   "/create",
   async (req, res) => {
-    const { ownerPk } = req.body.data;
+    const { ownerPk, authPk } = req.body.data;
     try {
-      const from = decodePrivateKey(ownerPk);
+      const fromAddr = new Wallet(decodePrivateKey(ownerPk)).address;
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",
           "https://data-seed-prebsc-1-s1.binance.org:8545/"
         )
       );
-      const fromAuth = new Wallet(from).connect(provider);
+      const auth = new Wallet(decodePrivateKey(authPk)).connect(provider);
       const contract = new PQRSDContract(
         configService.get("PQRSD_CONTRACT"),
-        fromAuth
+        auth
       );
-      const tx = await contract.create();
+      const tx = await contract.create(fromAddr);
       const receipt = await tx.wait();
       const tokenId = receipt.events![0].args!.tokenId.toString();
       const fee = formatEther(receipt.gasUsed.mul(tx.gasPrice!));
