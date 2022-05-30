@@ -188,8 +188,8 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
       res.status(200).json({
         txHash: tx.hash,
         fee,
-        currentOwner: toPk,
-        prevOwner: fromPk,
+        currentOwner: to,
+        prevOwner: fromAddress,
         status: receipt.status === 0 ? TxStatus.ERROR : TxStatus.SUCCESS,
         timestamp: block.timestamp,
       });

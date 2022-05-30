@@ -14,17 +14,36 @@ contract PQRSD is Ownable {
         uint256 indexed tokenId,
         bytes32 indexed newStatus
     );
+    event AdminAdded(address indexed actor, address newAdmin);
+    event AdminRemoved(address indexed actor, address oldAdmin);
 
-    modifier onlyEmitter(uint256 tokenId) {
+    modifier onlyAdminOrEmitter(uint256 tokenId) {
         require(
-            _owners[tokenId] == msg.sender,
-            "PQRSD: You are not the emitter of this pqrsd"
+            _isEmitterOrAdmin(tokenId),
+            "PQRSD: You are not the emitter of this pqrsd or an admin"
+        );
+        _;
+    }
+
+    mapping(address => bool) public admins;
+
+    modifier onlyAdmins() {
+        require(
+            admins[msg.sender] || msg.sender == owner(),
+            "You are not an admin"
         );
         _;
     }
 
     //Auto increment
     Counters.Counter private _tokenIds;
+
+    function _isEmitterOrAdmin(uint256 tokenId) internal view returns (bool) {
+        return
+            _owners[tokenId] == msg.sender ||
+            admins[msg.sender] ||
+            msg.sender == owner();
+    }
 
     /// @dev given
     function ownerOf(uint256 tokenId) public view returns (address) {
@@ -56,33 +75,56 @@ contract PQRSD is Ownable {
         }
     }
 
-    function create() public returns (uint256) {
+    function create(address _tokenOwner) public onlyAdmins returns (uint256) {
         uint256 newItemId = _tokenIds.current();
-        _balances[msg.sender] += 1;
-        _owners[newItemId] = msg.sender;
+        _balances[_tokenOwner] += 1;
+        _owners[newItemId] = _tokenOwner;
         //_currentPQRSD[msg.sender] = newItemId;
         _tokenIds.increment();
-        emit StatusChanged(msg.sender, newItemId, "CREATED");
+        emit StatusChanged(_tokenOwner, newItemId, "CREATED");
         return newItemId;
     }
 
     function update(uint256 _tokenId, string memory _newState)
         public
-        onlyEmitter(_tokenId)
+        onlyAdminOrEmitter(_tokenId)
     {
-        emit StatusChanged(msg.sender, _tokenId, stringToBytes32(_newState));
+        address _owner = _owners[_tokenId];
+        emit StatusChanged(_owner, _tokenId, stringToBytes32(_newState));
     }
 
     function close(uint256 _tokenId)
         public
-        onlyEmitter(_tokenId)
+        onlyAdminOrEmitter(_tokenId)
         returns (bool)
     {
+        address _owner = _owners[_tokenId];
         //reduce balances
-        _balances[msg.sender] -= 1;
+        _balances[_owner] -= 1;
         //clean owner
         _owners[_tokenId] = address(0);
-        emit StatusChanged(msg.sender, _tokenId, "CLOSED");
+        emit StatusChanged(_owner, _tokenId, "CLOSED");
         return true;
+    }
+
+    /// @dev adds a new wallet to the admin map
+    function addAdmin(address _newAdmin) public onlyOwner {
+        admins[_newAdmin] = true;
+        emit AdminAdded(_msgSender(), _newAdmin);
+    }
+
+    /// @dev removes a wallet from the admin map
+    function removeAdmin(address _admin) public onlyOwner {
+        require(
+            _admin != owner(),
+            "CertificadoTIL: Owner cannot be removed as admin"
+        );
+        admins[_admin] = false;
+        emit AdminRemoved(_msgSender(), _admin);
+    }
+
+    /// @dev checks if wallet is an admin
+    function isAdmin(address _admin) public view returns (bool) {
+        return admins[_admin];
     }
 }

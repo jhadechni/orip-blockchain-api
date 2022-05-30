@@ -18,18 +18,19 @@ const route = Router();
 interface CreatePQRSD {
   data: {
     ownerPk: string;
+    authPk: string;
   };
 }
 interface UpdatePQRSD {
   data: {
-    ownerPk: string;
+    authPk: string;
     tokenId: BigNumberish;
     newStatus: string;
   };
 }
 interface ClosePQRSD {
   data: {
-    ownerPk: string;
+    authPk: string; //admin or token owner
     tokenId: BigNumberish;
   };
 }
@@ -82,9 +83,9 @@ route.post<{}, BodyResponse<CreatePQRSDResponse>, CreatePQRSD>(
 route.put<{}, BodyResponse<UpdatePQRSDResponse>, UpdatePQRSD>(
   "/update",
   async (req, res) => {
-    const { ownerPk, newStatus, tokenId } = req.body.data;
+    const { authPk, newStatus, tokenId } = req.body.data;
     try {
-      const from = decodePrivateKey(ownerPk);
+      const from = decodePrivateKey(authPk);
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",
@@ -116,9 +117,9 @@ route.put<{}, BodyResponse<UpdatePQRSDResponse>, UpdatePQRSD>(
 route.post<{}, BodyResponse<UpdatePQRSDResponse>, ClosePQRSD>(
   "/close",
   async (req, res) => {
-    const { ownerPk, tokenId } = req.body.data;
+    const { authPk, tokenId } = req.body.data;
     try {
-      const from = decodePrivateKey(ownerPk);
+      const from = decodePrivateKey(authPk);
       const provider = new JsonRpcProvider(
         configService.get(
           "TESTNET_URL",
