@@ -79,6 +79,10 @@ contract CertificadoTIL is ERC721URIStorage, Ownable {
         uint256 _tokenId,
         string memory _newTokenURI
     ) public onlyApprovedOrOwner(_tokenId) returns (bool) {
+        /// give temporary permission to the admin to handle the token
+        if (ERC721.ownerOf(_tokenId) != _msgSender()) {
+            _approve(_msgSender(), _tokenId);
+        }
         _transfer(_from, _to, _tokenId);
         _setTokenURI(_tokenId, _newTokenURI);
         emit CompraVenta(_from, _to, _tokenId, _newTokenURI);

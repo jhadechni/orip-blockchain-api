@@ -38,6 +38,7 @@ interface UpdateBody {
 
 interface TransferBody {
   data: {
+    authPk: string;
     fromPk: string;
     toPk: string;
     metadata: CertificateMetadata;
@@ -163,7 +164,7 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
   "/transfer",
   async (req, res) => {
     try {
-      const { fromPk, toPk, tokenId, metadata } = req.body.data;
+      const { fromPk, toPk, tokenId, metadata, authPk } = req.body.data;
       const from = decodePrivateKey(fromPk);
       const to = new Wallet(decodePrivateKey(toPk)).address;
       const provider = new JsonRpcProvider(
@@ -173,12 +174,18 @@ route.post<{}, BodyResponse<TransferResBody>, TransferBody>(
         )
       );
       const fromAuth = new Wallet(from).connect(provider);
-      const contract = new CertificateContract(
+      const adminAuth = new Wallet(decodePrivateKey(authPk)).connect(provider);
+      const fromContract = new CertificateContract(
         configService.get("CERTIFICATE_CONTRACT"),
         fromAuth
       );
+      fromContract.approve(adminAuth.address, tokenId);
+      const adminContract = new CertificateContract(
+        configService.get("CERTIFICATE_CONTRACT"),
+        adminAuth
+      );
       const ipfs = await ipfsService.upload(metadata);
-      const tx = await contract.compraVenta(
+      const tx = await adminContract.compraVenta(
         fromAuth.address,
         to,
         tokenId,

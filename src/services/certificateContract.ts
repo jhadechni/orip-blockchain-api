@@ -7,6 +7,9 @@ export default class CertificateContract {
   constructor(address: string, wallet: Signer | Provider) {
     this.contract = CertificadoTIL__factory.connect(address, wallet);
   }
+  approve(spender: string, tokenId: BigNumberish) {
+    return this.contract.approve(spender, tokenId);
+  }
   addCertificate(owner: string, ipfsHash: string) {
     return this.contract.addCertificado(owner, ipfsHash);
   }
